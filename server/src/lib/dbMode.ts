@@ -1,4 +1,4 @@
-/** TeamTask-style DB pick: D1 when Cloudflare creds exist, else SQLite. */
+/** DB pick: D1 when Cloudflare creds exist, else SQLite. */
 
 export type DbMode = 'sqlite' | 'd1'
 

@@ -1,8 +1,8 @@
 # BiscuitsCrumb / Excelorithm Vending
 
-React UI + Express/Prisma API. Runs like **TeamTask**: one process, one URL.
+React UI + Express/Prisma API. One process, one URL.
 
-## Local (same as TeamTask `start-web.cmd`)
+## Local (`start-web.cmd`)
 
 Double-click or run:
 
@@ -31,7 +31,7 @@ npm run dev
 
 UI: http://localhost:5173 → proxies API to :4000
 
-## Server (Docker — same idea as TeamTask)
+## Server (Docker)
 
 ```bash
 git clone https://github.com/imrankhokhar/biscuitsCrumb.git
@@ -43,7 +43,7 @@ docker compose up -d --build
 
 Open `http://YOUR_SERVER_IP:8080` — UI + API + SQLite on a Docker volume.
 
-## Database (auto-pick like TeamTask)
+## Database (auto-pick)
 
 | When | Database |
 |------|----------|

@@ -3,7 +3,7 @@ setlocal
 cd /d "%~dp0"
 
 echo.
-echo === BiscuitsCrumb (TeamTask-style: one app on port 4000) ===
+echo === BiscuitsCrumb (one app on port 4000) ===
 echo.
 
 call npm install
