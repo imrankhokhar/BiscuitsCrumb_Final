@@ -1,13 +1,8 @@
 import ExcelJS from 'exceljs'
 import pdfParse from 'pdf-parse'
+import type { SheetCredit } from './cashlineMatch.js'
 
-export type SheetCredit = {
-  key: string
-  rowIndex: number
-  date: Date | null
-  amount: number
-  description: string
-}
+export type { SheetCredit }
 
 function round2(n: number) {
   return Math.round(n * 100) / 100

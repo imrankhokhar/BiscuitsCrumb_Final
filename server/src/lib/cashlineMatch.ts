@@ -1,4 +1,10 @@
-import type { SheetCredit } from './cashlineParse.js'
+export type SheetCredit = {
+  key: string
+  rowIndex: number
+  date: Date | null
+  amount: number
+  description: string
+}
 
 export type CashlineStatus =
   | 'clear'
