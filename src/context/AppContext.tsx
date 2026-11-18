@@ -42,6 +42,7 @@ interface AppContextValue {
   refreshItems: () => Promise<void>
   refreshPayable: () => Promise<void>
   refreshBranding: () => Promise<void>
+  refreshSounds: () => Promise<void>
   refreshUnreadNotifications: () => Promise<void>
   login: (email: string, password: string) => Promise<string | null>
   signup: (name: string, email: string, password: string) => Promise<string | null>
@@ -187,11 +188,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [],
   )
 
+  const refreshSounds = useCallback(async () => {
+    const sounds = await api.publicSounds()
+    if (sounds) applySoundSettings(sounds)
+  }, [applySoundSettings])
+
   const loadSessionData = useCallback(async (user: User) => {
     setCurrentUser(user)
     applyThemePreference(user.themePreference)
     const tasks: Promise<unknown>[] = [
       api.publicBranding().then((r) => setBranding(r.branding)),
+      refreshSounds(),
       api.currencies().then((r) => setCurrencies(r.currencies)),
     ]
     if (user.permissions.includes('items.view')) {
@@ -215,12 +222,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           .settings()
           .then((r) => {
             setCurrencyState(r.settings.currency)
-            setBranding({
-              appName: r.settings.appName,
-              tagline: r.settings.tagline,
-              logoUrl: r.settings.logoUrl,
-            })
-            applySoundSettings(r.settings)
           })
           .catch(() => undefined),
       )
@@ -240,7 +241,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       )
     }
     await Promise.all(tasks)
-  }, [applySoundSettings])
+  }, [applySoundSettings, refreshSounds])
 
   useEffect(() => {
     let cancelled = false
@@ -276,12 +277,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // 60s keeps due/unread fresh without burning DB row-reads (D1 free tier / shared SQLite)
     const id = window.setInterval(() => {
       void refreshPayable().catch(() => undefined)
+      void refreshSounds().catch(() => undefined)
       if (currentUser.permissions.includes('notifications.view')) {
         void refreshUnreadNotifications().catch(() => undefined)
       }
     }, 60_000)
     return () => window.clearInterval(id)
-  }, [currentUser, refreshPayable, refreshUnreadNotifications])
+  }, [currentUser, refreshPayable, refreshSounds, refreshUnreadNotifications])
 
   const login = useCallback(
     async (email: string, password: string) => {
@@ -323,23 +325,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
     applyThemePreference('system')
   }, [])
 
+  const applyStock = useCallback((itemId: string, quantity: number) => {
+    setItems((current) =>
+      current.map((item) => (item.id === itemId ? { ...item, quantity } : item)),
+    )
+  }, [])
+
   const addItemCharge = useCallback(
     async (itemId: string) => {
       const result = await api.chargeItem(itemId)
+      applyStock(result.item.id, result.item.quantity)
       await Promise.all([refreshPayable(), refreshItems()])
       playNotifySound('item')
       return result.chargeId
     },
-    [refreshPayable, refreshItems, playNotifySound],
+    [applyStock, refreshPayable, refreshItems, playNotifySound],
   )
 
   const undoItemCharge = useCallback(
     async (chargeId: string) => {
-      await api.undoCharge(chargeId)
+      const result = await api.undoCharge(chargeId)
+      applyStock(String(result.item.id), result.item.quantity)
       await Promise.all([refreshPayable(), refreshItems()])
       playNotifySound('unselect')
     },
-    [refreshPayable, refreshItems, playNotifySound],
+    [applyStock, refreshPayable, refreshItems, playNotifySound],
   )
 
   const selfPay = useCallback(
@@ -413,6 +423,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       refreshItems,
       refreshPayable,
       refreshBranding,
+      refreshSounds,
       refreshUnreadNotifications,
       login,
       signup,
@@ -449,6 +460,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       refreshItems,
       refreshPayable,
       refreshBranding,
+      refreshSounds,
       refreshUnreadNotifications,
       login,
       signup,

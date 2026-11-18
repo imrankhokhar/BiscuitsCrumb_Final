@@ -5,7 +5,7 @@ import { useApp } from '../../context/AppContext'
 import { SettingsBack } from '../../components/SettingsBack'
 
 export function NotificationSettingsPage() {
-  const { playNotifySound } = useApp()
+  const { playNotifySound, refreshSounds } = useApp()
   const navigate = useNavigate()
   const [soundEnabled, setSoundEnabled] = useState(true)
   const [itemSoundFile, setItemSoundFile] = useState<File | null>(null)
@@ -37,6 +37,7 @@ export function NotificationSettingsPage() {
       if (paymentSoundFile) form.set('paymentSound', paymentSoundFile)
       if (unselectSoundFile) form.set('unselectSound', unselectSoundFile)
       await api.setNotifications(form)
+      await refreshSounds()
       navigate('/settings')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed')
