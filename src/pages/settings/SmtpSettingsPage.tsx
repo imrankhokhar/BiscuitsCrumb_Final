@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../lib/api'
+import { PasswordInput } from '../../components/PasswordInput'
 import { SettingsBack } from '../../components/SettingsBack'
 import type { SmtpSettings } from '../../types'
 
@@ -84,11 +85,11 @@ export function SmtpSettingsPage() {
         </label>
         <label>
           Password {smtp.hasPass ? '(leave ******** to keep current)' : ''}
-          <input
-            type="password"
+          <PasswordInput
             value={smtp.pass}
             onChange={(e) => setSmtp((s) => ({ ...s, pass: e.target.value }))}
             placeholder={smtp.hasPass ? '********' : ''}
+            autoComplete="new-password"
           />
         </label>
         <label>

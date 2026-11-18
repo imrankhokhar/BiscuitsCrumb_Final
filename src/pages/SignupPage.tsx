@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate } from 'react-router-dom'
+import { isPasswordCharsetError, passwordIsReady, PasswordRules } from '../components/PasswordRules'
+import { PasswordInput } from '../components/PasswordInput'
 import { useApp } from '../context/AppContext'
 
 export function SignupPage() {
@@ -9,12 +11,19 @@ export function SignupPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [passwordChecked, setPasswordChecked] = useState(false)
 
   if (currentUser) return <Navigate to="/" replace />
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
     setBusy(true)
+    setPasswordChecked(true)
+    if (!passwordIsReady(password)) {
+      setError(null)
+      setBusy(false)
+      return
+    }
     setError(await signup(name, email, password))
     setBusy(false)
   }
@@ -76,17 +85,16 @@ export function SignupPage() {
             </label>
             <label>
               Password
-              <input
-                type="password"
+              <PasswordInput
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                minLength={6}
                 autoComplete="new-password"
-                placeholder="At least 6 characters"
+                placeholder="At least 8 characters"
               />
             </label>
-            {error && <p className="error">{error}</p>}
+            <PasswordRules value={password} submitted={passwordChecked} />
+            {error && !isPasswordCharsetError(error) && <p className="error">{error}</p>}
             <button type="submit" className="btn primary auth-submit" disabled={busy}>
               {busy ? 'Creating…' : 'Create account'}
             </button>

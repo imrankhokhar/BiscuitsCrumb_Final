@@ -2,6 +2,8 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '../lib/api'
 import { PageHeader } from '../components/PageHeader'
+import { isPasswordCharsetError, passwordIsReady, PasswordRules } from '../components/PasswordRules'
+import { PasswordInput } from '../components/PasswordInput'
 
 export function UserFormPage() {
   const { userId } = useParams()
@@ -17,12 +19,14 @@ export function UserFormPage() {
   })
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [passwordChecked, setPasswordChecked] = useState(false)
 
   useEffect(() => {
     void (async () => {
       const r = await api.userRoles()
       setRoles(r.roles)
-      const defaultRole = r.roles.find((x) => x.code === 'user')?.id || r.roles[0]?.id || ''
+      const defaultRole =
+        r.roles.find((x) => x.code.toLowerCase() === 'user')?.id || r.roles[0]?.id || ''
       if (isEdit && userId) {
         const { users } = await api.users()
         const user = users.find((u) => u.id === userId)
@@ -45,6 +49,12 @@ export function UserFormPage() {
     e.preventDefault()
     setBusy(true)
     setError(null)
+    const checkingPassword = !isEdit || form.password.length > 0
+    if (checkingPassword) setPasswordChecked(true)
+    if (checkingPassword && !passwordIsReady(form.password)) {
+      setBusy(false)
+      return
+    }
     try {
       if (isEdit && userId) {
         await api.updateUser(userId, {
@@ -103,15 +113,17 @@ export function UserFormPage() {
         </label>
         <label>
           Password {isEdit ? '(leave blank to keep current)' : ''}
-          <input
-            type="password"
+          <PasswordInput
             value={form.password}
             onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
             required={!isEdit}
-            minLength={6}
-            placeholder={isEdit ? '••••••••' : 'At least 6 characters'}
+            autoComplete="new-password"
+            placeholder={isEdit ? '••••••••' : 'At least 8 characters'}
           />
         </label>
+        {(!isEdit || form.password) && (
+          <PasswordRules value={form.password} submitted={passwordChecked} />
+        )}
         <label>
           Role
           <select
@@ -134,7 +146,7 @@ export function UserFormPage() {
           />
           <span>Active account</span>
         </label>
-        {error && <p className="error">{error}</p>}
+        {error && !isPasswordCharsetError(error) && <p className="error">{error}</p>}
         <button type="submit" className="btn primary" disabled={busy}>
           {busy ? 'Saving…' : isEdit ? 'Save user' : 'Create user'}
         </button>

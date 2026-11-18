@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../lib/api'
+import { isPasswordCharsetError, passwordIsReady, PasswordRules } from '../../components/PasswordRules'
+import { PasswordInput } from '../../components/PasswordInput'
 import { SettingsBack } from '../../components/SettingsBack'
 
 export function PasswordSettingsPage() {
@@ -8,9 +10,15 @@ export function PasswordSettingsPage() {
   const [pw, setPw] = useState({ current: '', next: '', confirm: '' })
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [passwordChecked, setPasswordChecked] = useState(false)
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
+    setPasswordChecked(true)
+    if (!passwordIsReady(pw.next)) {
+      setError(null)
+      return
+    }
     if (pw.next !== pw.confirm) {
       setError('New passwords do not match')
       return
@@ -37,34 +45,33 @@ export function PasswordSettingsPage() {
       <form className="panel stack" onSubmit={(e) => void onSubmit(e)}>
         <label>
           Current password
-          <input
-            type="password"
+          <PasswordInput
             value={pw.current}
             onChange={(e) => setPw((p) => ({ ...p, current: e.target.value }))}
             required
+            autoComplete="current-password"
           />
         </label>
         <label>
           New password
-          <input
-            type="password"
+          <PasswordInput
             value={pw.next}
             onChange={(e) => setPw((p) => ({ ...p, next: e.target.value }))}
             required
-            minLength={6}
+            autoComplete="new-password"
           />
         </label>
         <label>
           Confirm new password
-          <input
-            type="password"
+          <PasswordInput
             value={pw.confirm}
             onChange={(e) => setPw((p) => ({ ...p, confirm: e.target.value }))}
             required
-            minLength={6}
+            autoComplete="new-password"
           />
         </label>
-        {error && <p className="error">{error}</p>}
+        <PasswordRules value={pw.next} submitted={passwordChecked} />
+        {error && !isPasswordCharsetError(error) && <p className="error">{error}</p>}
         <button type="submit" className="btn primary" disabled={busy}>
           {busy ? 'Saving…' : 'Save password'}
         </button>
