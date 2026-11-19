@@ -1,65 +1,54 @@
-# BiscuitsCrumb / Excelorithm Vending
+# BiscuitsCrumb
 
-React UI + Express/Prisma API. One process, one URL.
+React app. Sign-in, data, and files all live in Supabase. The browser talks to Supabase directly.
 
-## Local (`start-web.cmd`)
-
-Double-click or run:
+## Run
 
 ```bat
-start-web.cmd
+npm install
+npm run dev:ui
 ```
 
-Open **http://localhost:4000**
+Open http://localhost:5173
 
-- Admin: `admin@excelorithm.com` / `admin123`
-
-That builds the UI, starts the API, and serves both together (no Vite proxy, no second terminal).
-
-### Dev mode (hot reload UI — optional)
-
-```bat
-npm run setup:server
-npm run dev:server
-```
-
-Second terminal:
-
-```bat
-npm run dev
-```
-
-UI: http://localhost:5173 → proxies API to :4000
-
-## Server (Docker)
-
-```bash
-git clone https://github.com/imrankhokhar/biscuitsCrumb.git
-cd biscuitsCrumb
-cp .env.docker.example .env
-# set JWT_SECRET and CLIENT_ORIGIN=http://YOUR_SERVER_IP:8080
-docker compose up -d --build
-```
-
-Open `http://YOUR_SERVER_IP:8080` — UI + API + SQLite on a Docker volume.
-
-## Database (auto-pick)
-
-| When | Database |
-|------|----------|
-| Local `start-web.cmd` | **SQLite** (`FORCE_SQLITE=1`) |
-| Server without D1 env | **SQLite** in Docker volume |
-| Server with D1 env + `FORCE_SQLITE=0` | **Cloudflare D1** over HTTP (Prisma adapter) |
-
-**Live D1** — in server `.env` / Docker `.env`:
+Create `.env` in this folder before starting. It is not committed.
 
 ```env
-FORCE_SQLITE=0
-CLOUDFLARE_ACCOUNT_ID=c572f097e1a07b2c249efa2921ec98b6
-CLOUDFLARE_D1_DATABASE_ID=1f6ca043-2eef-415f-9f0c-16bec2161cd9
-CLOUDFLARE_API_TOKEN=your_token
-DATABASE_URL=file:./prisma/dev.db
+VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
 ```
 
-`DATABASE_URL` is only a Prisma placeholder (do **not** use `unused-placeholder.db`). Real data is in D1.  
-Apply schema once: `npm run d1:migrate:remote` then `docker compose up -d --build`.
+Use the publishable key, not the secret key.
+
+## Supabase
+
+Auth is email and password. `public.Users.id` is the same id as `auth.users.id`.
+
+Tables are in the `public` schema: Users, Roles, Permissions, RolePermission, Items, ItemCharge, PayableAccount, Payment, Currency, Setting, Notifications, EmailTemplates, EmailMessage.
+
+Storage buckets:
+
+| Bucket | Used for |
+| --- | --- |
+| `profile-images` | Avatars |
+| `item-images` | Item photos |
+| `company-assets` | Logo and notification sounds |
+| `attachments` | Receipts |
+
+`company-assets` is public so the logo and sounds load for every user.
+
+These functions are called from the app:
+
+- `branding()` returns `appName`, `tagline`, and `logoUrl`. That name, line, and logo show on every screen, including login. Only an admin edits them.
+- `app_sounds()` returns `notificationSoundEnabled`, `notificationSoundUrl`, `paymentSoundUrl`, and `unselectedSoundUrl`. Those tones play for every signed-in user.
+- `take_item_unit(item_id)` subtracts one from stock when someone presses +. `return_item_unit(item_id)` puts that unit back.
+
+A new payable account writes an empty string into `deleteByName`. That column is required.
+
+An admin can add a user without being signed out. `authenticated` needs insert and update on `public."Users"`, limited to admins.
+
+Saving a new password sends the current password with it. The new password needs 8 characters, a lowercase letter, an uppercase letter, a number, and a symbol.
+
+## Screens
+
+Items, payables, payments, accountability, cashline, notifications, profile, users, roles, and settings (theme, password, branding, currency, notification sounds, SMTP, email templates).
