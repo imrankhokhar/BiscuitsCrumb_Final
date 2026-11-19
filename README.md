@@ -22,7 +22,7 @@ Use the publishable key, not the secret key.
 
 ## Supabase
 
-Auth is email and password. `public.Users.id` is the same id as `auth.users.id`.
+Auth is email and password.
 
 Tables are in the `public` schema: Users, Roles, Permissions, RolePermission, Items, ItemCharge, PayableAccount, Payment, Currency, Setting, Notifications, EmailTemplates, EmailMessage.
 
@@ -35,17 +35,10 @@ Storage buckets:
 | `company-assets` | Logo and notification sounds |
 | `attachments` | Receipts |
 
-`company-assets` is public so the logo and sounds load for every user.
-
 These functions are called from the app:
 
 - `branding()` returns `appName`, `tagline`, and `logoUrl`. That name, line, and logo show on every screen, including login. Only an admin edits them.
 - `app_sounds()` returns `notificationSoundEnabled`, `notificationSoundUrl`, `paymentSoundUrl`, and `unselectedSoundUrl`. Those tones play for every signed-in user.
-- `take_item_unit(item_id)` subtracts one from stock when someone presses +. `return_item_unit(item_id)` puts that unit back.
-
-A new payable account writes an empty string into `deleteByName`. That column is required.
-
-An admin can add a user without being signed out. `authenticated` needs insert and update on `public."Users"`, limited to admins.
 
 Saving a new password sends the current password with it. The new password needs 8 characters, a lowercase letter, an uppercase letter, a number, and a symbol.
 
