@@ -1,4 +1,4 @@
-import type { SheetCredit } from '../../server/src/lib/cashlineMatch.ts'
+import type { SheetCredit } from './cashlineMatch.ts'
 
 function round2(n: number) {
   return Math.round(n * 100) / 100

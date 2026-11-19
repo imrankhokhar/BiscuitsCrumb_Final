@@ -1,55 +1,26 @@
 {
-  "name": "excelorithm-vending-machine",
+  "name": "biscuitscrumb",
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k -n api,ui -c cyan,magenta \"npm run dev:server\" \"vite --host\"",
+    "dev": "vite --host",
     "dev:ui": "vite --host",
-    "dev:server": "npm --prefix server run dev",
     "build": "tsc --noEmit && vite build",
-    "build:web": "npm run build && node scripts/copy-web.mjs",
-    "preview": "vite preview",
-    "setup": "npm install && npm run setup:server",
-    "setup:server": "npm --prefix server install && node scripts/ensure-server-env.mjs && npm --prefix server run db:push && npm --prefix server run db:seed",
-    "start": "npm --prefix server start",
-    "start:web": "npm run build:web && npm --prefix server run build && npm start",
-    "docker:build": "docker compose build",
-    "docker:up": "docker compose up -d",
-    "docker:down": "docker compose down",
-    "cf:generate": "prisma generate --schema server/prisma/schema.prisma --generator worker",
-    "cf:typecheck": "npm run cf:generate && tsc -p worker/tsconfig.json --noEmit",
-    "cf:dev": "npm run cf:generate && wrangler dev",
-    "cf:deploy": "npm run cf:generate && wrangler deploy",
-    "d1:migrate:local": "wrangler d1 migrations apply biscuitscrumb --local",
-    "d1:migrate:remote": "wrangler d1 migrations apply biscuitscrumb --remote",
-    "d1:seed": "tsx worker/scripts/seed-sql.ts && wrangler d1 execute biscuitscrumb --local --file=worker/seed.generated.sql",
-    "d1:seed:remote": "tsx worker/scripts/seed-sql.ts && wrangler d1 execute biscuitscrumb --remote --file=worker/seed.generated.sql",
-    "deploy:server-d1": "bash scripts/server-deploy-d1.sh"
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@prisma/adapter-d1": "^6.19.3",
-    "@prisma/client": "^6.19.3",
     "@supabase/supabase-js": "^2.109.0",
-    "bcryptjs": "^2.4.3",
     "exceljs": "^4.4.0",
-    "hono": "^4.13.13",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.1.1",
-    "zod": "^3.24.1"
+    "react-router-dom": "^7.1.1"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260702.1",
-    "@types/bcryptjs": "^2.4.6",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
     "@vitejs/plugin-react": "^4.3.4",
-    "concurrently": "^9.2.5",
-    "prisma": "^6.19.3",
-    "tsx": "^4.19.2",
     "typescript": "~5.7.2",
-    "vite": "^6.0.6",
-    "wrangler": "^4.86.0"
+    "vite": "^6.0.6"
   }
 }

@@ -2,8 +2,8 @@ import {
   ADMIN_PERMISSIONS,
   PERMISSIONS,
   USER_PERMISSIONS,
-} from '../../server/src/lib/permissions.ts'
-import { matchCashline } from '../../server/src/lib/cashlineMatch.ts'
+} from './permissions.ts'
+import { matchCashline } from './cashlineMatch.ts'
 import type {
   AppNotification,
   AppSettings,
